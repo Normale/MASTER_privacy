@@ -8,5 +8,7 @@ RUN pip install flwr scikit-learn
 
 # Copy server code
 COPY server.py .
+COPY data.pkl .
+COPY model.pkl .
 
 CMD ["python", "server.py"]
