@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 
 class SklearnClient(fl.client.NumPyClient):
     def __init__(self):
+        print("Initializing SklearnClient")
         # Initialize a simple Logistic Regression model
         self.model = LogisticRegression(solver='liblinear')
 
@@ -14,6 +15,7 @@ class SklearnClient(fl.client.NumPyClient):
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.2)
 
     def get_parameters(self, config):
+        print("Getting parameters")
         # Ensure the model is fitted before accessing coef_ and intercept_
         if not hasattr(self.model, 'coef_'):
             self.model.fit(self.X_train, self.y_train)
@@ -21,22 +23,26 @@ class SklearnClient(fl.client.NumPyClient):
         return self.model.coef_.flatten().tolist() + self.model.intercept_.tolist()
 
     def set_parameters(self, parameters):
+        print("Setting parameters")
         # Set model parameters (weights and intercept)
         n_features = self.X.shape[1]
         self.model.coef_ = np.array(parameters[:-1]).reshape(1, n_features)
         self.model.intercept_ = np.array(parameters[-1:])
 
     def fit(self, parameters, config):
+        print("Fitting model")
         # Fit model on local data
         self.set_parameters(parameters)
         self.model.fit(self.X_train, self.y_train)
         return self.get_parameters(), len(self.X_train), {}
 
     def evaluate(self, parameters, config):
+        print("Evaluating model")
         # Evaluate model on test data
         self.set_parameters(parameters)
         loss = self.model.score(self.X_test, self.y_test)
-        return loss, len(self.X_test), {}
+        accuracy = np.mean(self.model.predict(self.X_test) == self.y_test)
+        return loss, len(self.X_test), {"accuracy": accuracy}
 
 def main():
     # Start the Flower client
