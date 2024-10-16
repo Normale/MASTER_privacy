@@ -13,7 +13,10 @@ class SklearnClient(fl.client.NumPyClient):
         self.X, self.y = make_classification(n_samples=100, n_features=10, n_informative=5, random_state=42)
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.2)
 
-    def get_parameters(self):
+    def get_parameters(self, config):
+        # Ensure the model is fitted before accessing coef_ and intercept_
+        if not hasattr(self.model, 'coef_'):
+            self.model.fit(self.X_train, self.y_train)
         # Return model parameters (weights and intercept)
         return self.model.coef_.flatten().tolist() + self.model.intercept_.tolist()
 
@@ -32,13 +35,14 @@ class SklearnClient(fl.client.NumPyClient):
     def evaluate(self, parameters, config):
         # Evaluate model on test data
         self.set_parameters(parameters)
-        accuracy = self.model.score(self.X_test, self.y_test)
-        return float(accuracy), len(self.X_test), {}
+        loss = self.model.score(self.X_test, self.y_test)
+        return loss, len(self.X_test), {}
 
 def main():
     # Start the Flower client
     client = SklearnClient()
     fl.client.start_client(server_address="flower-server:8080", client=client.to_client())
     print("Client closed")
+
 if __name__ == "__main__":
     main()
