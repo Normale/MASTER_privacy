@@ -38,7 +38,7 @@ class SklearnClient(fl.client.NumPyClient):
     def __init__(self):
         print("Initializing SklearnClient")
         # Initialize a simple Logistic Regression model
-        self.model = LogisticRegression(solver='liblinear', max_iter=10)
+        self.model = LogisticRegression(solver='liblinear', max_iter=1)
         set_initial_params(self.model)
         self.X, self.y = make_classification(n_samples=10000, n_features=20, n_classes=2, n_informative=15)
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.2)

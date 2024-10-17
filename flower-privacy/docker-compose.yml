@@ -15,6 +15,12 @@ services:
     depends_on:
       - flower-server
 
+  flower-client2:
+    build: client2
+    networks:
+      - flower-network
+    depends_on:
+      - flower-server
 networks:
   flower-network:
     driver: bridge
